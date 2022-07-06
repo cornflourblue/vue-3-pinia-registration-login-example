@@ -49,17 +49,17 @@ function fakeBackend() {
 
             function register() {
                 const user = body();
-    
+
                 if (users.find(x => x.username === user.username)) {
                     return error('Username "' + user.username + '" is already taken')
                 }
-    
+
                 user.id = users.length ? Math.max(...users.map(x => x.id)) + 1 : 1;
                 users.push(user);
                 localStorage.setItem(usersKey, JSON.stringify(users));
                 return ok();
             }
-    
+
             function getUsers() {
                 if (!isAuthenticated()) return unauthorized();
                 return ok(users.map(x => basicDetails(x)));
@@ -67,37 +67,42 @@ function fakeBackend() {
 
             function getUserById() {
                 if (!isAuthenticated()) return unauthorized();
-    
+
                 const user = users.find(x => x.id === idFromUrl());
                 return ok(basicDetails(user));
             }
-    
+
             function updateUser() {
                 if (!isAuthenticated()) return unauthorized();
-    
+
                 let params = body();
                 let user = users.find(x => x.id === idFromUrl());
-    
+
                 // only update password if entered
                 if (!params.password) {
                     delete params.password;
                 }
-    
+
+                // if username changed check if taken
+                if (params.username !== user.username && users.find(x => x.username === params.username)) {
+                    return error('Username "' + params.username + '" is already taken')
+                }
+
                 // update and save user
                 Object.assign(user, params);
                 localStorage.setItem(usersKey, JSON.stringify(users));
-    
+
                 return ok();
             }
-    
+
             function deleteUser() {
                 if (!isAuthenticated()) return unauthorized();
-    
+
                 users = users.filter(x => x.id !== idFromUrl());
                 localStorage.setItem(usersKey, JSON.stringify(users));
                 return ok();
             }
-    
+
             // helper functions
 
             function ok(body) {
@@ -116,13 +121,13 @@ function fakeBackend() {
                 const { id, username, firstName, lastName } = user;
                 return { id, username, firstName, lastName };
             }
-    
+
             function isAuthenticated() {
                 return opts.headers['Authorization'] === 'Bearer fake-jwt-token';
             }
 
             function body() {
-                return opts.body && JSON.parse(opts.body);    
+                return opts.body && JSON.parse(opts.body);
             }
 
             function idFromUrl() {

@@ -19,10 +19,14 @@ const schema = Yup.object().shape({
 
 async function onSubmit(values) {
     const usersStore = useUsersStore();
-    await usersStore.register(values);
-    await router.push('/account/login');
     const alertStore = useAlertStore();
-    alertStore.success('Registration successful');
+    try {
+        await usersStore.register(values);
+        await router.push('/account/login');
+        alertStore.success('Registration successful');
+    } catch (error) { 
+        alertStore.error(error);
+    }
 }
 </script>
 
