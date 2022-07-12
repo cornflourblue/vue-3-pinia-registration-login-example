@@ -1,6 +1,4 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router';
-
 import { Nav, Alert } from '@/components';
 import { useAuthStore } from '@/stores';
 
@@ -12,7 +10,7 @@ const authStore = useAuthStore();
         <Nav />
         <Alert />
         <div class="container pt-4 pb-4">
-            <RouterView />
+            <router-view />
         </div>
     </div>
 </template>
